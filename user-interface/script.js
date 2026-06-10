@@ -40,7 +40,7 @@ const apiResponseEl = document.getElementById('apiResponse');
 const endpointTestButtons = document.querySelectorAll('.endpoint-test');
 
 // API Configuration
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'https://simple-image-recognition.onrender.com';
 
 // State
 let selectedFiles = [];

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Bottle Classifier</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-wine-bottle"></i>
+                <h1>BottleVision AI</h1>
+            </div>
+            <nav class="nav">
+                <button class="nav-btn active" data-target="single">Single Image</button>
+                <button class="nav-btn" data-target="batch">Batch Upload</button>
+                <button class="nav-btn" data-target="api">API Status</button>
+            </nav>
+        </header>
+
+        <main class="main-content">
+            <!-- Single Image Prediction -->
+            <section id="single" class="content-section active">
+                <div class="section-header">
+                    <h2><i class="fas fa-camera"></i> Single Image Classification</h2>
+                    <p>Upload an image to detect if it contains a water bottle</p>
+                </div>
+                
+                <div class="upload-container">
+                    <div class="upload-area" id="singleUploadArea">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>Drop image here or click to browse</h3>
+                        <p>Supports JPG, PNG, GIF, WEBP (Max 10MB)</p>
+                        <input type="file" id="singleImage" accept="image/*">
+                        <div class="btn btn-secondary">Select Image</div>
+                    </div>
+                    
+                    <div class="image-preview-container hidden" id="previewContainer">
+                        <div class="preview-header">
+                            <h4><i class="fas fa-image"></i> Image Preview</h4>
+                            <button class="btn-icon" id="removeImage">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="image-preview">
+                            <img id="previewImage" src="" alt="Preview">
+                        </div>
+                        <div class="preview-info">
+                            <div class="info-row">
+                                <span>Filename:</span>
+                                <span id="fileName">--</span>
+                            </div>
+                            <div class="info-row">
+                                <span>Dimensions:</span>
+                                <span id="imageDimensions">--</span>
+                            </div>
+                            <div class="info-row">
+                                <span>Size:</span>
+                                <span id="imageSize">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="action-section">
+                    <button id="classifyBtn" class="btn btn-primary" disabled>
+                        <i class="fas fa-search"></i> Classify Image
+                    </button>
+                    <div class="processing-status hidden" id="processingStatus">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Analyzing image...</span>
+                    </div>
+                </div>
+                
+                <!-- Results Section -->
+                <div id="resultSection" class="result-section hidden">
+                    <h3><i class="fas fa-chart-bar"></i> Classification Results</h3>
+                    
+                    <div class="result-main">
+                        <div class="result-card">
+                            <div class="result-label">Prediction</div>
+                            <div id="predictionValue" class="result-value">--</div>
+                        </div>
+                        
+                        <div class="result-card">
+                            <div class="result-label">Confidence</div>
+                            <div class="result-value">
+                                <span id="confidenceValue">--</span>%
+                            </div>
+                        </div>
+                        
+                        <div class="result-card">
+                            <div class="result-label">Water Bottle</div>
+                            <div id="bottleStatus" class="result-value status">--</div>
+                        </div>
+                    </div>
+                    
+                    <div class="confidence-meter">
+                        <div class="meter-header">
+                            <span>Confidence Level</span>
+                            <span id="meterPercentage">0%</span>
+                        </div>
+                        <div class="meter-bar">
+                            <div class="meter-fill" id="meterFill"></div>
+                            <div class="meter-threshold"></div>
+                        </div>
+                        <div class="meter-labels">
+                            <span>Low</span>
+                            <span>Medium</span>
+                            <span>High</span>
+                        </div>
+                    </div>
+                    
+                    <div class="message-box" id="messageBox">
+                        <i class="fas fa-info-circle"></i>
+                        <p id="messageText">Upload an image to get started</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Batch Upload Section -->
+            <section id="batch" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-images"></i> Batch Image Classification</h2>
+                    <p>Upload multiple images to classify them in batch</p>
+                </div>
+                
+                <div class="batch-container">
+                    <div class="upload-area" id="batchUploadArea">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>Drop images here or click to browse</h3>
+                        <p>Select multiple images (Max 20 files, 10MB each)</p>
+                        <input type="file" id="batchImages" accept="image/*" multiple>
+                        <div class="btn btn-secondary">Select Images</div>
+                    </div>
+                    
+                    <div class="file-list-container hidden" id="fileListContainer">
+                        <div class="file-list-header">
+                            <h4><i class="fas fa-list"></i> Selected Files</h4>
+                            <span id="fileCount">0 files</span>
+                        </div>
+                        <div class="file-list" id="fileList">
+                            <!-- Files will be added here -->
+                        </div>
+                        <div class="file-actions">
+                            <button class="btn btn-secondary" id="clearFiles">
+                                <i class="fas fa-trash"></i> Clear All
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="batch-info">
+                        <h4><i class="fas fa-info-circle"></i> Batch Processing Info</h4>
+                        <ul>
+                            <li>Maximum 20 images per batch</li>
+                            <li>Supported formats: JPG, PNG, GIF, WEBP</li>
+                            <li>Each file size limit: 10MB</li>
+                            <li>Results will be displayed in a summary table</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="action-section">
+                        <button id="classifyBatchBtn" class="btn btn-primary" disabled>
+                            <i class="fas fa-play-circle"></i> Start Batch Classification
+                        </button>
+                        <div class="processing-status hidden" id="batchProcessingStatus">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>Processing <span id="currentFile">0</span> of <span id="totalFiles">0</span> images...</span>
+                        </div>
+                    </div>
+                    
+                    <div id="batchResults" class="batch-results hidden">
+                        <h4><i class="fas fa-chart-pie"></i> Batch Results Summary</h4>
+                        
+                        <div class="summary-stats">
+                            <div class="stat">
+                                <div class="stat-label">Total Images</div>
+                                <div id="totalImages" class="stat-value">0</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-label">Water Bottles</div>
+                                <div id="bottleCount" class="stat-value green">0</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-label">Other Objects</div>
+                                <div id="otherCount" class="stat-value">0</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-label">Avg Confidence</div>
+                                <div id="avgConfidence" class="stat-value">0%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="results-table-container">
+                            <table id="resultsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Image</th>
+                                        <th>Prediction</th>
+                                        <th>Confidence</th>
+                                        <th>Water Bottle</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Results will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="batch-actions">
+                            <button id="downloadBatchResults" class="btn btn-secondary">
+                                <i class="fas fa-download"></i> Download Results
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- API Status Section -->
+            <section id="api" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-server"></i> API Status</h2>
+                    <p>Check the status and connection to the classification API</p>
+                </div>
+                
+                <div class="api-container">
+                    <div class="api-status-card">
+                        <div class="api-status-header">
+                            <h3><i class="fas fa-network-wired"></i> API Endpoints</h3>
+                            <div class="status-indicator" id="apiStatusIndicator">
+                                <span class="status-dot"></span>
+                                <span class="status-text">Checking...</span>
+                            </div>
+                        </div>
+                        
+                        <div class="api-endpoints">
+                            <div class="endpoint">
+                                <div class="endpoint-method get">GET</div>
+                                <div class="endpoint-path">/</div>
+                                <div class="endpoint-desc">API information</div>
+                                <button class="endpoint-test" data-endpoint="/">Test</button>
+                            </div>
+                            
+                            <div class="endpoint">
+                                <div class="endpoint-method get">GET</div>
+                                <div class="endpoint-path">/health</div>
+                                <div class="endpoint-desc">Health check</div>
+                                <button class="endpoint-test" data-endpoint="/health">Test</button>
+                            </div>
+                            
+                            <div class="endpoint">
+                                <div class="endpoint-method post">POST</div>
+                                <div class="endpoint-path">/predict</div>
+                                <div class="endpoint-desc">Single image classification</div>
+                                <button class="endpoint-test" data-endpoint="/predict">Test</button>
+                            </div>
+                            
+                            <div class="endpoint">
+                                <div class="endpoint-method post">POST</div>
+                                <div class="endpoint-path">/predict-batch</div>
+                                <div class="endpoint-desc">Batch image classification</div>
+                                <button class="endpoint-test" data-endpoint="/predict-batch">Test</button>
+                            </div>
+                        </div>
+                        
+                        <div class="api-response">
+                            <h4><i class="fas fa-code"></i> Response</h4>
+                            <pre id="apiResponse">No requests made yet.</pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>Water Bottle Classifier &copy; 2023 | Powered by FastAPI & TensorFlow</p>
+            <div class="footer-links">
+                <a href="#"><i class="fas fa-book"></i> Documentation</a>
+                <a href="#"><i class="fas fa-code-branch"></i> GitHub</a>
+                <a href="#"><i class="fas fa-envelope"></i> Contact</a>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

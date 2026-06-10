@@ -7,12 +7,25 @@ from PIL import Image
 import io
 import uvicorn
 from predict import WaterBottleClassifier
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="Water Bottle Classifier API",
     description="A simple API to classify if an image contains a water bottle",
     version="1.0.0"
 )
+
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 
 # Initialize classifier (will load model when first prediction is made)
 classifier = None

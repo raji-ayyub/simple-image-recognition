@@ -84,7 +84,7 @@ def train_model(epochs=10):
     return model
 
 if __name__ == "__main__":
-    # Create sample directory structure if it doesn't exist
+   
     sample_structure = """
     Create this directory structure for training:
     
